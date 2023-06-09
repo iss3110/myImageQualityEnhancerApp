@@ -1,7 +1,8 @@
 # Installer la bibliothèque EBImage si elle n'est pas déjà installée
-if (!require(EBImage)) {
-  install.packages("EBImage")
-}
+# Try to find how to install it, for me this worked fine, depends on R version
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install(version = "3.16")
 
 library(EBImage)
 
@@ -78,6 +79,6 @@ segmentation_image <- function(image_path, threshold) {
 }
 
 # Exemple d'utilisation
-image_path <- "chemin/vers/image.jpg"
+image_path <- "Les Déménageurs Express.jpg"
 seuil <- 50  # Modifier le seuil selon vos besoins
 segmentation_image(image_path, seuil)
