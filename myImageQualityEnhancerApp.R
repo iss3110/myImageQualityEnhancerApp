@@ -1,24 +1,23 @@
-# Installer la bibliothèque EBImage si elle n'est pas déjà installée
-# Try to find how to install it, for me this worked fine, depends on R version
-if (!require("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
-BiocManager::install(version = "3.16")
+# Installer le package "magick" si ce n'est pas déjà fait
+if (!require(magick)) {
+  install.packages("magick")
+}
 
-library(EBImage)
+library(magick)
 
 segmentation_image <- function(image_path, threshold) {
   # Charger l'image
-  image <- readImage(image_path)
+  image <- image_read(image_path)
   
   # Convertir l'image en une matrice 3D
-  image_matrix <- as.array(image)
+  image_array <- image_data(image)
   
   # Dimensions de l'image
-  height <- dim(image_matrix)[1]
-  width <- dim(image_matrix)[2]
+  height <- dim(image_array)[1]
+  width <- dim(image_array)[2]
   
   # Convertir la matrice 3D en une matrice 2D (pixels x canaux)
-  flattened_matrix <- matrix(image_matrix, nrow = height * width, ncol = 3, byrow = TRUE)
+  flattened_matrix <- matrix(image_array, nrow = height * width, ncol = 3, byrow = TRUE)
   
   # Initialiser les groupes de pixels
   groups <- rep(0, height * width)
@@ -61,7 +60,7 @@ segmentation_image <- function(image_path, threshold) {
   }
   
   # Calculer la moyenne des valeurs des pixels pour chaque groupe
-  group_means <- tapply(flattened_matrix, groups, mean)
+  group_means <- tapply(flattened_matrix, groups, colMeans)
   
   # Remplacer les valeurs des pixels de chaque groupe avec la moyenne des valeurs du groupe
   for (i in 1:(height * width)) {
@@ -72,10 +71,11 @@ segmentation_image <- function(image_path, threshold) {
   segmented_matrix <- array(flattened_matrix, dim = c(height, width, 3))
   
   # Créer une nouvelle image à partir de la matrice segmentée
-  segmented_image <- Image(segmented_matrix)
+  segmented_image <- image_copy(image)
+  image_data(segmented_image) <- segmented_matrix
   
   # Afficher l'image segmentée
-  display(segmented_image)
+  print(segmented_image)
 }
 
 # Exemple d'utilisation
